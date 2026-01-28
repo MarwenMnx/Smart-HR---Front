@@ -21,7 +21,7 @@ export const routes: Routes = [
     loadComponent: () => import('./features/dashboard/dashboard').then((m) => m.Dashboard),
   },
 
-  // ✅ Employees
+  // Employees
   {
     path: 'employees',
     canActivate: [authGuard],
@@ -36,6 +36,20 @@ export const routes: Routes = [
     path: 'employees/:id',
     canActivate: [authGuard],
     loadComponent: () => import('./features/employees/employee-details').then((m) => m.EmployeeDetails),
+  },
+
+  // Attendance
+  {
+    path: 'attendance',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/attendance/attendance').then((m) => m.Attendance),
+  },
+
+  // ✅ Payroll
+  {
+    path: 'payroll',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/payroll/payroll').then((m) => m.Payroll),
   },
 
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },

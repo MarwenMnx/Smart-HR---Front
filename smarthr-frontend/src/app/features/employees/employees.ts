@@ -17,53 +17,407 @@ type Vm =
   template: `
     <app-header />
 
-    <div style="max-width: 900px; margin: 40px auto; padding: 0 16px; font-family: system-ui;">
-      <h2>Employees</h2>
+    <main class="page">
+      <div class="container">
+        <div class="pageHead">
+          <div>
+            <h1 class="title">Employees</h1>
+            <p class="subtitle">Browse employee directory</p>
+          </div>
 
-      <ng-container *ngIf="vm$ | async as vm">
-        <p *ngIf="vm.state === 'loading'">Loading /api/employees…</p>
-
-        <div *ngIf="vm.state === 'error'">
-          <p style="color:#ff4d4f">{{ vm.message }}</p>
-          <button (click)="reload()">Retry</button>
+          <ng-container *ngIf="vm$ | async as vm">
+            <span class="pill" *ngIf="vm.state === 'ok'">
+              Total: {{ vm.items.length }}
+            </span>
+            <span class="pill pill-loading" *ngIf="vm.state === 'loading'">
+              Loading…
+            </span>
+            <span class="pill pill-error" *ngIf="vm.state === 'error'">
+              Error
+            </span>
+          </ng-container>
         </div>
 
-        <div *ngIf="vm.state === 'ok'">
-          <p style="opacity:.8">Total: {{ vm.items.length }}</p>
+        <ng-container *ngIf="vm$ | async as vm">
+          <!-- Loading -->
+          <div class="stateCard" *ngIf="vm.state === 'loading'">
+            <div class="spinner" aria-hidden="true"></div>
+            <div>
+              <div class="stateTitle">Loading employees…</div>
+              <div class="stateText">Fetching /api/employees</div>
+            </div>
+          </div>
 
-          <table style="width:100%; border-collapse: collapse; margin-top: 12px;">
-            <thead>
-              <tr>
-                <th style="text-align:left; padding:8px; border-bottom:1px solid rgba(0,0,0,0.12);">ID</th>
-                <th style="text-align:left; padding:8px; border-bottom:1px solid rgba(0,0,0,0.12);">Name</th>
-                <th style="text-align:left; padding:8px; border-bottom:1px solid rgba(0,0,0,0.12);">Email</th>
-                <th style="text-align:left; padding:8px; border-bottom:1px solid rgba(0,0,0,0.12);">Department</th>
-                <th style="text-align:left; padding:8px; border-bottom:1px solid rgba(0,0,0,0.12);">Role</th>
-              </tr>
-            </thead>
+          <!-- Error -->
+          <div class="stateCard stateError" *ngIf="vm.state === 'error'">
+            <div class="stateIcon" aria-hidden="true">!</div>
+            <div class="stateBody">
+              <div class="stateTitle">We couldn’t load employees.</div>
+              <div class="stateText">{{ vm.message }}</div>
+              <div class="stateActions">
+                <button class="btn btn-primary" (click)="reload()">Retry</button>
+              </div>
+            </div>
+          </div>
 
-            <tbody>
-              <tr
-                *ngFor="let e of vm.items"
-                (click)="goToDetails(e.id)"
-                style="cursor:pointer"
-                onmouseover="this.style.background='rgba(0,0,0,0.04)'"
-                onmouseout="this.style.background='transparent'"
-              >
-                <td style="padding:8px; border-bottom:1px solid rgba(0,0,0,0.08);">{{ e.id }}</td>
-                <td style="padding:8px; border-bottom:1px solid rgba(0,0,0,0.08);">
-                  {{ e.firstName }} {{ e.lastName }}
-                </td>
-                <td style="padding:8px; border-bottom:1px solid rgba(0,0,0,0.08);">{{ e.email }}</td>
-                <td style="padding:8px; border-bottom:1px solid rgba(0,0,0,0.08);">{{ e.departmentName }}</td>
-                <td style="padding:8px; border-bottom:1px solid rgba(0,0,0,0.08);">{{ e.roleName }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </ng-container>
-    </div>
+          <!-- OK -->
+          <section class="card" *ngIf="vm.state === 'ok'">
+            <div class="cardHead">
+              <div class="cardTitleWrap">
+                <div class="cardIcon" aria-hidden="true">🧑‍🤝‍🧑</div>
+                <div>
+                  <h2 class="cardTitle">Directory</h2>
+                  <p class="cardSub">Click a row to open details</p>
+                </div>
+              </div>
+
+              <button class="btn btn-ghost" (click)="reload()">Reload</button>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="tableWrap">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th class="colId">ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Department</th>
+                    <th>Role</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <tr
+                    class="row"
+                    *ngFor="let e of vm.items"
+                    (click)="goToDetails(e.id)"
+                    tabindex="0"
+                  >
+                    <td class="mono">{{ e.id }}</td>
+
+                    <td>
+                      <div class="nameCell">
+                        <span class="avatar" aria-hidden="true">
+                          {{ (e.firstName || '?')[0] | uppercase }}{{ (e.lastName || '?')[0] | uppercase }}
+                        </span>
+                        <div class="nameText">
+                          <div class="name">{{ e.firstName }} {{ e.lastName }}</div>
+                          <div class="meta muted">{{ e.departmentName }} · {{ e.roleName }}</div>
+                        </div>
+                      </div>
+                    </td>
+
+                    <td class="email">{{ e.email }}</td>
+                    <td>{{ e.departmentName }}</td>
+                    <td>{{ e.roleName }}</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div class="empty" *ngIf="vm.items.length === 0">
+                No employees found.
+              </div>
+            </div>
+          </section>
+        </ng-container>
+      </div>
+    </main>
   `,
+  styles: [`
+    :host { display:block; }
+
+    .page {
+      background: #f6f7fb;
+      padding: 28px 16px 48px;
+      min-height: calc(100vh - 64px);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    .container { max-width: 1100px; margin: 0 auto; }
+
+    .pageHead {
+      display:flex;
+      align-items:flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .title {
+      margin: 0;
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.2px;
+      color: #121C4E;
+    }
+
+    .subtitle {
+      margin: 6px 0 0;
+      font-size: 14px;
+      color: rgba(0,0,0,0.65);
+    }
+
+    /* Pills */
+    .pill {
+      display:inline-flex;
+      align-items:center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 900;
+      border: 1px solid rgba(0,0,0,0.12);
+      color: #121C4E;
+      background: rgba(18, 28, 78, 0.04);
+      white-space: nowrap;
+      margin-top: 2px;
+    }
+    .pill-loading { background: rgba(0,0,0,0.04); }
+    .pill-error { background: rgba(211, 47, 47, 0.08); border-color: rgba(211, 47, 47, 0.22); color: #8b1c1c; }
+
+    /* Buttons */
+    .btn {
+      border: 1px solid transparent;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-weight: 900;
+      cursor: pointer;
+      user-select: none;
+      line-height: 1;
+      font-size: 14px;
+      transition: transform 0.02s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+      background: transparent;
+      color: #121C4E;
+    }
+    .btn:active { transform: translateY(1px); }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; transform:none; }
+
+    .btn-primary {
+      background: #EE2722;
+      color: #fff;
+      box-shadow: 0 10px 18px rgba(238, 39, 34, 0.18);
+    }
+    .btn-primary:hover { box-shadow: 0 14px 24px rgba(238, 39, 34, 0.22); }
+
+    .btn-ghost {
+      border-color: rgba(18, 28, 78, 0.20);
+      background: transparent;
+    }
+    .btn-ghost:hover { background: rgba(18, 28, 78, 0.04); }
+
+    /* Card */
+    .card {
+      background: #fff;
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 16px;
+      box-shadow: 0 8px 22px rgba(0,0,0,0.05);
+      overflow: hidden;
+    }
+
+    .cardHead {
+      padding: 16px;
+      display:flex;
+      align-items:flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .cardTitleWrap {
+      display:flex;
+      align-items:flex-start;
+      gap: 10px;
+    }
+
+    .cardIcon {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      display:grid;
+      place-items:center;
+      background: rgba(18, 28, 78, 0.05);
+      border: 1px solid rgba(18, 28, 78, 0.10);
+      font-size: 16px;
+    }
+
+    .cardTitle {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 900;
+      color: #121C4E;
+    }
+
+    .cardSub {
+      margin: 4px 0 0;
+      font-size: 12px;
+      color: rgba(0,0,0,0.62);
+    }
+
+    .divider { height: 1px; background: rgba(0,0,0,0.08); }
+
+    /* Table */
+    .tableWrap {
+      overflow: auto;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      min-width: 860px; /* keeps columns readable on desktop */
+    }
+
+    thead th {
+      text-align: left;
+      padding: 12px 14px;
+      font-size: 12px;
+      font-weight: 900;
+      color: rgba(0,0,0,0.65);
+      background: rgba(18, 28, 78, 0.02);
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    tbody td {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      font-size: 14px;
+      color: rgba(0,0,0,0.82);
+      vertical-align: middle;
+    }
+
+    .row {
+      cursor: pointer;
+      transition: background 0.15s ease;
+      outline: none;
+    }
+
+    .row:hover {
+      background: rgba(18, 28, 78, 0.03);
+    }
+
+    .row:focus-visible {
+      box-shadow: inset 0 0 0 3px rgba(238, 39, 34, 0.18);
+      background: rgba(238, 39, 34, 0.05);
+    }
+
+    .colId { width: 90px; }
+
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      color: rgba(0,0,0,0.7);
+    }
+
+    .muted { color: rgba(0,0,0,0.62); }
+
+    .nameCell {
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 12px;
+      display:grid;
+      place-items:center;
+      font-weight: 900;
+      font-size: 12px;
+      color: #121C4E;
+      background: rgba(18, 28, 78, 0.06);
+      border: 1px solid rgba(18, 28, 78, 0.12);
+      flex: 0 0 auto;
+    }
+
+    .nameText { min-width: 0; }
+    .name {
+      font-weight: 900;
+      color: #121C4E;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 260px;
+    }
+
+    .meta {
+      font-size: 12px;
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 260px;
+    }
+
+    .email {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 280px;
+      color: rgba(0,0,0,0.78);
+    }
+
+    .empty {
+      padding: 16px;
+      color: rgba(0,0,0,0.65);
+      font-size: 13px;
+    }
+
+    /* States */
+    .stateCard {
+      background: #fff;
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 16px;
+      box-shadow: 0 8px 22px rgba(0,0,0,0.05);
+      padding: 16px;
+      display:flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      border: 2px solid rgba(0,0,0,0.16);
+      border-top-color: rgba(238, 39, 34, 0.8);
+      animation: spin 0.9s linear infinite;
+      margin-top: 2px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .stateError {
+      border-color: rgba(211, 47, 47, 0.20);
+      background: rgba(211, 47, 47, 0.03);
+    }
+
+    .stateIcon {
+      width: 22px;
+      height: 22px;
+      border-radius: 7px;
+      display:grid;
+      place-items:center;
+      font-weight: 900;
+      color: #d32f2f;
+      background: rgba(211, 47, 47, 0.12);
+      border: 1px solid rgba(211, 47, 47, 0.18);
+      margin-top: 1px;
+    }
+
+    .stateBody { display:grid; gap: 6px; }
+    .stateTitle { font-weight: 900; color:#121C4E; }
+    .stateText { font-size: 13px; color: rgba(0,0,0,0.72); white-space: pre-wrap; }
+    .stateActions { margin-top: 4px; }
+
+    @media (max-width: 860px) {
+      .table { min-width: 760px; }
+      .pageHead { flex-direction: column; align-items: stretch; }
+    }
+  `],
 })
 export class Employees {
   vm$!: Observable<Vm>;
