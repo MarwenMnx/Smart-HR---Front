@@ -58,17 +58,18 @@
           "defaultConfiguration": "production"
         },
         "serve": {
-          "builder": "@angular/build:dev-server",
-          "configurations": {
-            "production": {
-              "buildTarget": "smarthr-frontend:build:production"
-            },
-            "development": {
-              "buildTarget": "smarthr-frontend:build:development"
-            }
+        "builder": "@angular/build:dev-server",
+        "configurations": {
+          "production": {
+            "buildTarget": "smarthr-frontend:build:production"
           },
-          "defaultConfiguration": "development"
+          "development": {
+            "buildTarget": "smarthr-frontend:build:development",
+            "proxyConfig": "proxy.conf.json"
+          }
         },
+        "defaultConfiguration": "development"
+      },
         "test": {
           "builder": "@angular/build:unit-test"
         }

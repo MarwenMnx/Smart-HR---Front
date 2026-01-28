@@ -1,0 +1,21 @@
+<div class="wrap">
+  <h1>SmartHR</h1>
+
+  <form class="card" [formGroup]="form" (ngSubmit)="onSubmit()">
+    <label>
+      Email
+      <input type="email" formControlName="email" placeholder="email@company.com" />
+    </label>
+
+    <label>
+      Password
+      <input type="password" formControlName="password" placeholder="••••••••" />
+    </label>
+
+    <button type="submit" [disabled]="form.invalid || loading()">
+      {{ loading() ? 'Signing in…' : 'Login' }}
+    </button>
+
+    <p class="error" *ngIf="error()">{{ error() }}</p>
+  </form>
+</div>
