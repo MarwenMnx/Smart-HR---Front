@@ -32,6 +32,13 @@ import { AuthService, MeResponse } from '../../core/auth/auth.service';
             >
               Employees
             </a>
+            <a
+              routerLink="/departments"
+              routerLinkActive="active"
+              [routerLinkActiveOptions]="{ exact: true }"
+            >
+              Departments
+            </a>
             <a routerLink="/employees/new" routerLinkActive="active">
               New Employee
             </a>

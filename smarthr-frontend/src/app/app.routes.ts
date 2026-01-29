@@ -37,6 +37,14 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./features/employees/employee-details').then((m) => m.EmployeeDetails),
   },
+    // ✅ Departments (NgRx)
+  {
+    path: 'departments',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/departments/departments.page').then((m) => m.DepartmentsPage),
+  },
+
 
   // Attendance
   {
